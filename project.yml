@@ -13,6 +13,8 @@ targets:
       properties:
         UILaunchScreen: {}
         NSHealthShareUsageDescription: Pulse reads your Apple Watch data to calculate Recovery, Strain and Sleep scores.
+        NSCameraUsageDescription: Pulse uses the camera to scan meals and estimate calories.
+        NSPhotoLibraryUsageDescription: Pulse can analyze meal photos from your library.
     entitlements:
       path: Pulse/Pulse.entitlements
       properties:

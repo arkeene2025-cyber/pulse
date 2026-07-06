@@ -31,6 +31,8 @@ struct DashboardView: View {
                 .tabItem { Label("Today", systemImage: "circle.circle.fill") }
             SleepTab()
                 .tabItem { Label("Sleep", systemImage: "moon.zzz.fill") }
+            FoodTab()
+                .tabItem { Label("Food", systemImage: "fork.knife") }
             TrendsTab()
                 .tabItem { Label("Trends", systemImage: "chart.bar.fill") }
         }
