@@ -1,0 +1,23 @@
+name: Pulse
+options:
+  bundleIdPrefix: com.aarya
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  Pulse:
+    type: application
+    platform: iOS
+    sources: [Pulse]
+    info:
+      path: Pulse/Info.plist
+      properties:
+        UILaunchScreen: {}
+        NSHealthShareUsageDescription: Pulse reads your Apple Watch data to calculate Recovery, Strain and Sleep scores.
+    entitlements:
+      path: Pulse/Pulse.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.aarya.pulse
+        TARGETED_DEVICE_FAMILY: 1
