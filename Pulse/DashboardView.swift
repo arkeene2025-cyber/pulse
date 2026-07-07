@@ -35,10 +35,15 @@ struct DashboardView: View {
                 .tabItem { Label("Food", systemImage: "fork.knife") }
             TrendsTab()
                 .tabItem { Label("Trends", systemImage: "chart.bar.fill") }
+            ProfileTab()
+                .tabItem { Label("You", systemImage: "person.fill") }
         }
         .tint(Theme.green)
         .preferredColorScheme(.dark)
-        .task { await health.refresh() }
+        .task {
+            StrainEngine.maxHR = UserProfile.load().maxHR
+            await health.refresh()
+        }
     }
 }
 

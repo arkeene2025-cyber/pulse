@@ -113,24 +113,55 @@ struct BalanceCard: View {
     let caloriesIn: Int
     let caloriesOut: Int
 
-    var balance: Int { caloriesIn - caloriesOut }
+    private let profile = UserProfile.load()
+
+    var target: Int { profile.targetCalories }
+    var remaining: Int { target - caloriesIn }
 
     var body: some View {
         VStack(spacing: 12) {
             HStack {
                 stat(value: caloriesIn, label: "Eaten", color: Theme.green)
-                Image(systemName: "minus").foregroundStyle(.secondary)
+                stat(value: target, label: goalLabel, color: Theme.blue)
+                stat(value: remaining, label: remaining >= 0 ? "Left to eat" : "Over target",
+                     color: remaining >= 0 ? Theme.green : Theme.yellow)
                 stat(value: caloriesOut, label: "Burned", color: .orange)
-                Image(systemName: "equal").foregroundStyle(.secondary)
-                stat(value: balance, label: balance <= 0 ? "Deficit" : "Surplus",
-                     color: balance <= 0 ? Theme.green : Theme.yellow)
             }
-            Text(balance <= 0
-                 ? "You're in a calorie deficit — on track if you're cutting."
-                 : "You've eaten more than you've burned so far today.")
+
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white.opacity(0.08)).frame(height: 10)
+                    Capsule().fill(Theme.green.gradient)
+                        .frame(width: min(geo.size.width * Double(caloriesIn) / Double(max(target, 1)), geo.size.width), height: 10)
+                }
+            }
+            .frame(height: 10)
+
+            Text(statusLine)
                 .font(.footnote).foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .card()
+    }
+
+    var goalLabel: String {
+        switch profile.goal {
+        case .bulk: return "Bulk target"
+        case .cut: return "Cut target"
+        case .maintain: return "Target"
+        }
+    }
+
+    var statusLine: String {
+        if profile.goal == .bulk {
+            return remaining > 0
+                ? "Eat \(remaining) more kcal to hit your bulking target — don't skip it, this is where the muscle comes from."
+                : "Bulking target hit ✅ — surplus achieved for today."
+        } else {
+            return remaining >= 0
+                ? "\(remaining) kcal left within your target."
+                : "You're \(-remaining) kcal over target today."
+        }
     }
 
     func stat(value: Int, label: String, color: Color) -> some View {
