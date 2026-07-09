@@ -21,6 +21,8 @@ struct FoodTab: View {
                 VStack(spacing: 16) {
                     BalanceCard(caloriesIn: store.todaysCaloriesIn, caloriesOut: caloriesOut)
 
+                    WaterCard()
+
                     HStack(spacing: 12) {
                         Button {
                             showCamera = true
@@ -271,5 +273,64 @@ struct CameraPicker: UIViewControllerRepresentable {
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             parent.dismiss()
         }
+    }
+}
+
+// MARK: - Water tracking
+
+struct WaterCard: View {
+    @State private var glasses = WaterStore.todayGlasses
+
+    var ml: Int { glasses * WaterStore.glassML }
+    var goalGlasses: Int { WaterStore.goalGlasses }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("Water", systemImage: "drop.fill")
+                    .font(.headline)
+                    .foregroundStyle(.cyan)
+                Spacer()
+                Text("\(ml) / \(WaterStore.dailyGoalML) ml")
+                    .font(.subheadline.bold())
+            }
+
+            HStack(spacing: 6) {
+                ForEach(0..<goalGlasses, id: \.self) { i in
+                    Image(systemName: i < glasses ? "drop.fill" : "drop")
+                        .font(.subheadline)
+                        .foregroundStyle(i < glasses ? .cyan : .secondary.opacity(0.3))
+                }
+            }
+
+            HStack(spacing: 12) {
+                Button {
+                    WaterStore.removeGlass()
+                    glasses = WaterStore.todayGlasses
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                }
+                .disabled(glasses == 0)
+
+                Button {
+                    WaterStore.addGlass()
+                    glasses = WaterStore.todayGlasses
+                } label: {
+                    Label("+ Glass (250 ml)", systemImage: "plus.circle.fill")
+                        .font(.subheadline.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .background(.cyan.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
+                        .foregroundStyle(.cyan)
+                }
+            }
+
+            Text("Add the water widget to your Lock Screen to log a glass in one tap — long-press Lock Screen → Customize → add a Pulse widget.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .card()
     }
 }

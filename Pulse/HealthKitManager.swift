@@ -34,12 +34,24 @@ final class HealthKitManager: ObservableObject {
     }
 
     func refresh() async {
-        var days: [DailyMetrics] = []
         let cal = Calendar.current
-        for offset in stride(from: 29, through: 0, by: -1) {
-            let day = cal.startOfDay(for: cal.date(byAdding: .day, value: -offset, to: Date())!)
-            days.append(await metrics(for: day))
+        let dayStarts = stride(from: 29, through: 0, by: -1).map { offset in
+            cal.startOfDay(for: cal.date(byAdding: .day, value: -offset, to: Date())!)
         }
+
+        // Fetch all 30 days concurrently instead of one at a time —
+        // sequential fetches made the dashboard look frozen on first launch.
+        let days: [DailyMetrics] = await withTaskGroup(of: (Int, DailyMetrics).self) { group in
+            for (index, day) in dayStarts.enumerated() {
+                group.addTask { (index, await self.metrics(for: day)) }
+            }
+            var results = [DailyMetrics?](repeating: nil, count: dayStarts.count)
+            for await (index, metrics) in group {
+                results[index] = metrics
+            }
+            return results.compactMap { $0 }
+        }
+
         history = days
         today = days.last
 
